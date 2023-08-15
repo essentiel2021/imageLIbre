@@ -7,14 +7,31 @@ use Illuminate\Http\Request;
 
 class AlbumController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware(['auth','verified'])->except('show');
+    }
     /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index()//liste des albums de l'utilisateur connecté
     {
-        //
+        //recupere les albums ainsi que leurs photos active comme non active 
+        // $albums = auth()->user()->albums()->with('photos',function($query){
+        //     $query->withoutGlobalScope('active')->orderByDesc('created_at');
+        // })->orderByDesc('updated_at')->paginate();
+
+        //ecriture simplifier 
+        $albums = auth()->user()->albums()->with('photos',fn($query) =>$query->withoutGlobalScope('active')
+        ->orderByDesc('created_at'))->orderByDesc('updated_at')->paginate();
+        $data = [
+            'title' => $description = 'Mes albums',
+            'albums' => $albums,
+            'heading' => $description 
+        ];
+        return view('albums.index',$data);
     }
 
     /**
